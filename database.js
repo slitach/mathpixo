@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const DB_DIR = path.join(__dirname, 'data');
+const isVercel = !!process.env.VERCEL;
+const DB_DIR = isVercel ? path.join('/tmp', 'data') : path.join(__dirname, 'data');
 const DB_FILE = path.join(DB_DIR, 'db.json');
 
 // Initialize database

@@ -13,10 +13,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const isVercel = !!process.env.VERCEL;
+
 // Setup Multer to store uploaded files in a persistent folder
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, 'public', 'uploads');
+    const uploadDir = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'public', 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -70,6 +72,9 @@ app.use((req, res, next) => {
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
+if (isVercel) {
+  app.use('/uploads', express.static(path.join('/tmp', 'uploads')));
+}
 
 // Authentication Middlewares
 function requireAuth(req, res, next) {
