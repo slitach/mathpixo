@@ -105,7 +105,7 @@ tabButtons.forEach(button => {
 copyBtn.addEventListener('click', () => {
     const textToCopy = latexOutput.value;
     if (!textToCopy) return;
-    copyTextToClipboard(textToCopy, copyBtn, '<i class="fa-regular fa-copy"></i> Copy LaTeX');
+    copyTextToClipboard(textToCopy, copyBtn);
 });
 
 // Auto-save changes to the local/server state when editing
@@ -169,12 +169,54 @@ exportCombinedBtn.addEventListener('click', () => {
 // ==========================================================================
 
 // Handle incoming files
-function handleFiles(files) {
+async function handleFiles(files) {
     let firstNewId = null;
+    const fileListToProcess = Array.from(files);
 
-    Array.from(files).forEach(file => {
+    for (const file of fileListToProcess) {
         // Validate type (images or PDFs)
-        if (!file.type.match('image.*') && file.type !== 'application/pdf') return;
+        if (!file.type.match('image.*') && file.type !== 'application/pdf') continue;
+
+        if (file.type === 'application/pdf') {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                const pageCount = pdfDoc.getPageCount();
+
+                if (pageCount > 1) {
+                    // Split multi-page PDF into separate single-page files
+                    for (let i = 0; i < pageCount; i++) {
+                        const newPdf = await PDFLib.PDFDocument.create();
+                        const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
+                        newPdf.addPage(copiedPage);
+                        
+                        const pdfBytes = await newPdf.save();
+                        const pageBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        
+                        const nameWithoutExt = file.name.replace(/\.pdf$/i, '');
+                        const pageFile = new File([pageBlob], `${nameWithoutExt}_page_${i + 1}.pdf`, { type: 'application/pdf' });
+                        
+                        const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        if (!firstNewId) firstNewId = fileId;
+
+                        const fileObj = {
+                            id: fileId,
+                            name: pageFile.name,
+                            size: formatBytes(pageFile.size),
+                            file: pageFile,
+                            previewUrl: URL.createObjectURL(pageFile),
+                            latex: '',
+                            status: 'pending',
+                            errorMsg: ''
+                        };
+                        uploadedFiles.push(fileObj);
+                    }
+                    continue; // Skip adding the original combined file
+                }
+            } catch (err) {
+                console.error('Failed to parse or split PDF, loading as-is:', err);
+            }
+        }
 
         const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         if (!firstNewId) firstNewId = fileId;
@@ -191,7 +233,7 @@ function handleFiles(files) {
         };
 
         uploadedFiles.push(fileObj);
-    });
+    }
 
     if (uploadedFiles.length > 0) {
         // Hide dashboard empty state, show active workspace
@@ -210,7 +252,10 @@ function handleFiles(files) {
 // Render the sidebar list
 function renderSidebar() {
     fileList.innerHTML = '';
-    pageCountBadge.textContent = `${uploadedFiles.length} page${uploadedFiles.length !== 1 ? 's' : ''}`;
+    const activeLang = localStorage.getItem("lang") || "en";
+    const dict = (typeof i18n !== 'undefined' && i18n[activeLang]) ? i18n[activeLang] : {};
+    const pageText = uploadedFiles.length === 1 ? (dict.page_singular || 'page') : (dict.page_plural || 'pages');
+    pageCountBadge.textContent = `${uploadedFiles.length} ${pageText}`;
 
     let hasConverted = false;
 
@@ -222,21 +267,21 @@ function renderSidebar() {
         // Build status markup
         let statusClass = 'status-pending';
         let statusIcon = '<i class="fa-regular fa-clock"></i>';
-        let statusText = 'Pending';
+        let statusText = dict.status_pending || 'Pending';
 
         if (file.status === 'converting') {
             statusClass = 'status-converting';
             statusIcon = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            statusText = 'Converting...';
+            statusText = dict.status_converting || 'Converting...';
         } else if (file.status === 'converted') {
             statusClass = 'status-converted';
             statusIcon = '<i class="fa-regular fa-circle-check"></i>';
-            statusText = 'Converted';
+            statusText = dict.status_converted || 'Converted';
             hasConverted = true;
         } else if (file.status === 'error') {
             statusClass = 'status-error';
             statusIcon = '<i class="fa-solid fa-circle-exclamation"></i>';
-            statusText = 'Error';
+            statusText = dict.status_error || 'Error';
         }
 
         const isPdf = file.file ? (file.file.type === 'application/pdf') : file.name.toLowerCase().endsWith('.pdf');
@@ -323,7 +368,9 @@ function selectFile(id) {
 
     // Update Conversion Status Screen
     if (file.status === 'converting') {
-        overlayStatusText.textContent = 'Extracting formulas using Gemini...';
+        const activeLang = localStorage.getItem("lang") || "en";
+        const dict = (typeof i18n !== 'undefined' && i18n[activeLang]) ? i18n[activeLang] : {};
+        overlayStatusText.textContent = dict.converting_overlay || 'Extracting formulas using Gemini...';
         imageOverlay.classList.remove('hidden');
         convertBtn.disabled = true;
     } else {
@@ -396,7 +443,9 @@ async function convertFile(id) {
 
     // Update workspace if this file is currently active
     if (activeFileId === id) {
-        overlayStatusText.textContent = 'Extracting formulas using Gemini...';
+        const activeLang = localStorage.getItem("lang") || "en";
+        const dict = (typeof i18n !== 'undefined' && i18n[activeLang]) ? i18n[activeLang] : {};
+        overlayStatusText.textContent = dict.converting_overlay || 'Extracting formulas using Gemini...';
         imageOverlay.classList.remove('hidden');
         convertBtn.disabled = true;
     }
@@ -490,12 +539,15 @@ async function convertAllPending() {
 // Render LaTeX formula using KaTeX
 function renderFormula(latex, status, errorMsg) {
     if (!mathRenderArea) return;
+    const activeLang = localStorage.getItem("lang") || "en";
+    const dict = (typeof i18n !== 'undefined' && i18n[activeLang]) ? i18n[activeLang] : {};
+
     if (status === 'error') {
         mathRenderArea.innerHTML = `
             <div class="render-placeholder" style="color: var(--error); max-width: 85%;">
                 <i class="fa-solid fa-circle-exclamation"></i>
-                <p><strong>Conversion Error</strong></p>
-                <p style="font-size: 0.8rem; margin-top: 0.25rem;">${errorMsg || 'Failed to process image.'}</p>
+                <p><strong>${dict.conversion_error || 'Conversion Error'}</strong></p>
+                <p style="font-size: 0.8rem; margin-top: 0.25rem;">${errorMsg || dict.failed_process_image || 'Failed to process image.'}</p>
             </div>
         `;
         return;
@@ -505,7 +557,7 @@ function renderFormula(latex, status, errorMsg) {
         mathRenderArea.innerHTML = `
             <div class="render-placeholder">
                 <i class="fa-solid fa-calculator"></i>
-                <p>Click "Convert This Page" to display preview.</p>
+                <p>${dict.click_convert_placeholder || 'Click "Convert This Page" to display preview.'}</p>
             </div>
         `;
         return;
@@ -529,13 +581,15 @@ function renderFormula(latex, status, errorMsg) {
                 iconClass = "fa-chart-line";
             }
             
+            const diagGeneratedText = dict.diagram_generated || 'Diagram Generated';
+            const diagNotRenderedText = dict.diagram_not_rendered || 'This diagram uses standard packages that cannot be rendered in HTML. The complete LaTeX code has been generated above and is ready to copy-paste into your LaTeX editor (like Overleaf)!';
+            
             mathRenderArea.innerHTML = `
                 <div class="render-placeholder" style="color: var(--primary); max-width: 80%; margin: 0 auto;">
                     <i class="fa-solid ${iconClass}" style="font-size: 2.25rem; color: var(--accent); margin-bottom: 0.75rem;"></i>
-                    <p style="font-weight: 600; font-size: 1.05rem;">${diagramType} Generated</p>
+                    <p style="font-weight: 600; font-size: 1.05rem;">${diagramType} (${diagGeneratedText})</p>
                     <p style="font-size: 0.8rem; margin-top: 0.35rem; color: var(--text-muted); line-height: 1.4;">
-                        This diagram uses standard packages that cannot be rendered in HTML. 
-                        The complete LaTeX code has been generated above and is ready to copy-paste into your LaTeX editor (like Overleaf)!
+                        ${diagNotRenderedText}
                     </p>
                 </div>
             `;
@@ -562,7 +616,7 @@ function renderFormula(latex, status, errorMsg) {
         mathRenderArea.innerHTML = `
             <div class="render-placeholder">
                 <i class="fa-solid fa-circle-info"></i>
-                <p>Could not render mathematics in preview. Raw code is in the code tab.</p>
+                <p>${dict.could_not_render_preview || 'Could not render mathematics in preview. Raw code is in the code tab.'}</p>
             </div>
         `;
     }
@@ -593,6 +647,44 @@ function cleanLatexForKaTeX(latex) {
     }
     
     return cleaned.trim();
+}
+
+// Clean LaTeX document metadata and commands for combined document structure
+function cleanLatexForCombinedDocument(latex) {
+    let lines = latex.split('\n');
+    let cleanedLines = [];
+    let extractedPackages = [];
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+
+        // Detect and extract usepackage declarations
+        if (trimmed.startsWith('\\usepackage')) {
+            extractedPackages.push(trimmed);
+            return;
+        }
+
+        // Skip document structure commands
+        if (trimmed.startsWith('\\documentclass') || 
+            trimmed.startsWith('\\begin{document}') || 
+            trimmed.startsWith('\\end{document}') ||
+            trimmed.startsWith('% Required packages:') ||
+            trimmed.startsWith('% - \\usepackage') ||
+            trimmed.startsWith('% - \\pgfplotsset') ||
+            trimmed.startsWith('\\title{') ||
+            trimmed.startsWith('\\author{') ||
+            trimmed.startsWith('\\date{') ||
+            trimmed.startsWith('\\maketitle')) {
+            return;
+        }
+
+        cleanedLines.push(line);
+    });
+
+    return {
+        content: cleanedLines.join('\n').trim(),
+        packages: extractedPackages
+    };
 }
 
 // Generate the fully compilable LaTeX Document
@@ -629,6 +721,17 @@ function generateCombinedDocument() {
         packages.push('\\pgfplotsset{compat=1.18}');
     }
 
+    // Extract packages from each file's LaTeX and add to main packages list
+    converted.forEach((file) => {
+        const { packages: filePackages } = cleanLatexForCombinedDocument(file.latex);
+        filePackages.forEach(pkg => {
+            const normalizedPkg = pkg.trim();
+            if (!packages.includes(normalizedPkg)) {
+                packages.push(normalizedPkg);
+            }
+        });
+    });
+
     // Build LaTeX document
     let doc = `\\documentclass{article}
 \\usepackage[utf8]{inputenc}
@@ -648,16 +751,8 @@ ${packages.join('\n')}
         doc += `% Page ${index + 1}: ${file.name}\n`;
         doc += `% ==========================================================================\n\n`;
         
-        let fileLatex = file.latex;
-        
-        // Strip out package suggestions from the page content (to keep it inside document body only)
-        let fileLines = fileLatex.split('\n');
-        let bodyLines = fileLines.filter(line => {
-            const trimmed = line.trim();
-            return !trimmed.startsWith('% Required packages:') && !trimmed.startsWith('% - \\usepackage') && !trimmed.startsWith('% - \\pgfplotsset');
-        });
-        
-        doc += bodyLines.join('\n').trim() + `\n\n`;
+        const { content } = cleanLatexForCombinedDocument(file.latex);
+        doc += content + `\n\n`;
         
         // Add newpage between pages
         if (index < converted.length - 1) {
@@ -674,7 +769,8 @@ ${packages.join('\n')}
 // ==========================================================================
 
 // Copy text utility with button feedback
-function copyTextToClipboard(text, buttonEl, originalMarkup) {
+function copyTextToClipboard(text, buttonEl) {
+    const oldHTML = buttonEl.innerHTML;
     navigator.clipboard.writeText(text).then(() => {
         buttonEl.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
         buttonEl.style.background = 'var(--accent)';
@@ -682,7 +778,7 @@ function copyTextToClipboard(text, buttonEl, originalMarkup) {
         buttonEl.style.color = '#fff';
         
         setTimeout(() => {
-            buttonEl.innerHTML = originalMarkup;
+            buttonEl.innerHTML = oldHTML;
             buttonEl.style.background = '';
             buttonEl.style.borderColor = '';
             buttonEl.style.color = '';
@@ -1101,3 +1197,11 @@ if (themeToggleBtn && themeIcon) {
         }
     });
 }
+
+// Listen for language changes to update sidebar and preview translation
+window.addEventListener('langChanged', () => {
+    renderSidebar();
+    if (activeFileId) {
+        selectFile(activeFileId);
+    }
+});

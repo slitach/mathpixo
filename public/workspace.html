@@ -32,6 +32,8 @@
     <script src="translate.js"></script>
     <!-- KaTeX JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- PDF-Lib for browser-side PDF splitting -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <!-- KaTeX Auto-render -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 </head>
@@ -180,7 +182,7 @@
                             <div class="image-overlay hidden" id="imageOverlay">
                                 <div class="spinner-container">
                                     <div class="loading-spinner"></div>
-                                    <p id="overlayStatusText">Converting formula using Gemini...</p>
+                                    <p id="overlayStatusText" data-i18n="converting_overlay">Converting formula using Gemini...</p>
                                 </div>
                             </div>
                         </div>
@@ -347,6 +349,6 @@
     </div>
 
     <!-- Main JavaScript Logic -->
-    <script src="app.js"></script>
+    <script defer src="app.js"></script>
 </body>
 </html>

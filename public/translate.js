@@ -97,7 +97,19 @@ const i18n = {
     send_btn: "Send Message",
     msg_sent: "Message Sent!",
     msg_sent_desc: "Thank you for reaching out. A support ticket has been opened and our team will get in touch with you shortly.",
-    send_another: "Send Another"
+    send_another: "Send Another",
+    
+    // Sidebar Status & Rendering placeholders
+    status_pending: "Pending",
+    status_converting: "Converting...",
+    status_converted: "Converted",
+    status_error: "Error",
+    conversion_error: "Conversion Error",
+    failed_process_image: "Failed to process image.",
+    click_convert_placeholder: 'Click "Convert This Page" to display preview.',
+    diagram_generated: "Diagram Generated",
+    diagram_not_rendered: "This diagram uses standard packages that cannot be rendered in HTML. The complete LaTeX code has been generated above and is ready to copy-paste into your LaTeX editor (like Overleaf)!",
+    could_not_render_preview: "Could not render mathematics in preview. Raw code is in the code tab."
   },
   fr: {
     // Nav
@@ -192,7 +204,19 @@ const i18n = {
     send_btn: "Envoyer le message",
     msg_sent: "Message envoyé !",
     msg_sent_desc: "Merci pour votre message. Un ticket d'assistance a été créé et nos conseillers vous recontacteront rapidement.",
-    send_another: "Envoyer un autre"
+    send_another: "Envoyer un autre",
+    
+    // Sidebar Status & Rendering placeholders
+    status_pending: "En attente",
+    status_converting: "Conversion...",
+    status_converted: "Converti",
+    status_error: "Erreur",
+    conversion_error: "Erreur de conversion",
+    failed_process_image: "Échec du traitement de l'image.",
+    click_convert_placeholder: "Cliquez sur 'Convertir cette page' pour afficher l'aperçu.",
+    diagram_generated: "Diagramme généré",
+    diagram_not_rendered: "Ce diagramme utilise des packages standard qui ne peuvent pas être rendus en HTML. Le code LaTeX complet a été généré ci-dessus et est prêt à être copié-collé dans votre éditeur LaTeX (comme Overleaf)!",
+    could_not_render_preview: "Impossible de générer le rendu mathématique. Le code brut est dans l'onglet code."
   },
   es: {
     // Nav
@@ -287,7 +311,19 @@ const i18n = {
     send_btn: "Enviar mensaje",
     msg_sent: "¡Mensaje enviado!",
     msg_sent_desc: "Gracias por contactar con nosotros. Se ha abierto un ticket de soporte y nuestro equipo te responderá pronto.",
-    send_another: "Enviar otro"
+    send_another: "Enviar otro",
+    
+    // Sidebar Status & Rendering placeholders
+    status_pending: "Pendiente",
+    status_converting: "Convirtiendo...",
+    status_converted: "Convertido",
+    status_error: "Error",
+    conversion_error: "Error de conversión",
+    failed_process_image: "Error al procesar la imagen.",
+    click_convert_placeholder: "Haz clic en 'Convertir esta página' para ver la vista previa.",
+    diagram_generated: "Diagrama generado",
+    diagram_not_rendered: "Este diagrama utiliza paquetes estándar que no se pueden renderizar en HTML. ¡El código LaTeX completo se ha generado arriba y está listo para copiar y pegar en su editor LaTeX (como Overleaf)!",
+    could_not_render_preview: "No se pudieron renderizar las matemáticas en la vista previa. El código fuente está en la pestaña de código."
   },
   ar: {
     // Nav
@@ -382,7 +418,19 @@ const i18n = {
     send_btn: "إرسال الرسالة",
     msg_sent: "تم إرسال الرسالة!",
     msg_sent_desc: "شكراً لتواصلك معنا. تم فتح تذكرة دعم وسيتواصل معك فريقنا قريباً.",
-    send_another: "إرسال رسالة أخرى"
+    send_another: "إرسال رسالة أخرى",
+    
+    // Sidebar Status & Rendering placeholders
+    status_pending: "قيد الانتظار",
+    status_converting: "جاري التحويل...",
+    status_converted: "تم التحويل",
+    status_error: "خطأ",
+    conversion_error: "خطأ في التحويل",
+    failed_process_image: "فشل في معالجة الصورة.",
+    click_convert_placeholder: "اضغط على 'تحويل هذه الصفحة' لعرض المعاينة.",
+    diagram_generated: "تم إنشاء المخطط",
+    diagram_not_rendered: "يستخدم هذا المخطط حزمًا قياسية لا يمكن عرضها في HTML. تم إنشاء كود LaTeX الكامل أعلاه وهو جاهز للنسخ واللصق في محرر LaTeX (مثل Overleaf)!",
+    could_not_render_preview: "تعذر عرض الرياضيات في المعاينة. الكود الخام موجود في علامة تبويب الكود."
   }
 };
 
