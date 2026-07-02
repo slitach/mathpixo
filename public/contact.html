@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact MathSnap AI - Customer Support & Billing Inquiries</title>
+    <meta name="description" content="Get in touch with the MathSnap AI team. Reach out for technical support, billing queries, enterprise customization, and integration help.">
+    <meta name="keywords" content="contact mathsnap, math ocr support, latex converter help, billing query mathsnap, enterprise integration contact">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Contact MathSnap AI - Support & Customizations">
+    <meta property="og:description" content="Reach out to our customer support team or query billing and custom enterprise subscription scopes.">
+    <meta property="og:url" content="https://mathsnap.com/contact.html">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Base Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+            position: relative;
+        }
+
+        /* Nav Header */
+        .nav-header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+            z-index: 10;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            border-color: var(--primary-glow);
+            background: rgba(99, 102, 241, 0.08);
+            transform: translateX(-3px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-text h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Layout Grid */
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1000px;
+            z-index: 10;
+        }
+
+        .contact-info-card, .contact-form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        /* Form styling */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.04);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid var(--primary);
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Success Message styling */
+        .success-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin-bottom: 1.25rem;
+            filter: drop-shadow(0 4px 8px rgba(20, 184, 166, 0.3));
+        }
+
+        /* Info Item styling */
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .info-icon-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .info-text h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-text p, .info-text a {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            line-height: 1.5;
+        }
+
+        .info-text a:hover {
+            color: var(--primary);
+        }
+
+        /* Background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Footer Links */
+        .page-footer {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 3.5rem;
+            z-index: 10;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .contact-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    <script src="translate.js"></script>
+</head>
+<body>
+    <!-- Background glowing elements -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Navigation Header -->
+    <header class="nav-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="logo-section">
+            <i class="fa-solid fa-square-root-variable logo-icon" style="font-size: 1.75rem;"></i>
+            <div class="logo-text">
+                <h1>Mathpix<span>o</span></h1>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <!-- Language Selector Dropdown -->
+            <div class="lang-selector-container">
+                <button class="btn-lang-toggle" id="langToggleBtn" title="Change Language" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); cursor: pointer; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; outline: none; transition: var(--transition-smooth); background: rgba(255, 255, 255, 0.02);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='#fff';" onmouseout="this.style.borderColor='var(--card-border)'; this.style.color='var(--text-muted)';">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="currentLangCode" style="font-weight: 700; text-transform: uppercase;">EN</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+                </button>
+                <div class="lang-dropdown hidden" id="langDropdown" style="top: calc(100% + 8px);">
+                    <button class="lang-opt" data-lang="en">English</button>
+                    <button class="lang-opt" data-lang="fr">Français</button>
+                    <button class="lang-opt" data-lang="es">Español</button>
+                    <button class="lang-opt" data-lang="ar">العربية</button>
+                </div>
+            </div>
+
+            <a href="workspace.html" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_workspace">Workspace</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Contact Layout -->
+    <div class="contact-layout">
+        
+        <!-- Left Column: Info card -->
+        <section class="contact-info-card">
+            <h2 data-i18n="contact_title">Get In Touch</h2>
+            <p class="subtitle" data-i18n="contact_subtitle">Have questions about plans, custom pricing, or developer integrations? Our support team is here to help.</p>
+            
+            <div class="info-item">
+                <div class="info-icon-container">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div class="info-text">
+                    <h4>Support Email</h4>
+                    <a href="mailto:support@mathpixo.com">support@mathpixo.com</a>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon-container" style="background: rgba(20, 184, 166, 0.1); color: var(--accent);">
+                    <i class="fa-solid fa-credit-card"></i>
+                </div>
+                <div class="info-text">
+                    <h4>Billing & Paypal Support</h4>
+                    <a href="mailto:mrslimanetachroun@gmail.com">mrslimanetachroun@gmail.com</a>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon-container" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="info-text">
+                    <h4>Data Security</h4>
+                    <p>All scanned documents and formula assets are encrypted and securely stored in your personal account history folder.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Right Column: Form card -->
+        <section class="contact-form-card">
+            <div id="formSection">
+                <h2 data-i18n="send_msg">Send a Message</h2>
+                <p class="subtitle" data-i18n="form_subtitle">Fill out the form below and we will get back to you within 24 hours.</p>
+                
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="contactName" data-i18n="full_name">Full Name</label>
+                        <input type="text" id="contactName" placeholder="Your Name" data-i18n="full_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactEmail" data-i18n="email_address">Email Address</label>
+                        <input type="email" id="contactEmail" placeholder="name@example.com" data-i18n="email_address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactSubject" data-i18n="subject">Subject</label>
+                        <select id="contactSubject" required style="color-scheme: dark;">
+                            <option value="" disabled selected>Select a topic</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="support">Technical Support</option>
+                            <option value="billing">Billing & Subscriptions</option>
+                            <option value="enterprise">Enterprise Solutions</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactMessage" data-i18n="message">Message</label>
+                        <textarea id="contactMessage" placeholder="How can we help you?" data-i18n="message" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" data-i18n="send_btn">
+                        <i class="fa-solid fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Success Overlay (Hidden initially) -->
+            <div class="success-box hidden" id="successSection">
+                <i class="fa-solid fa-circle-check success-icon"></i>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;" data-i18n="msg_sent">Message Sent!</h3>
+                <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 2rem;" data-i18n="msg_sent_desc">
+                    Thank you for reaching out. A support ticket has been opened and our team will get in touch with you shortly.
+                </p>
+                <button class="submit-btn" style="max-width: 180px;" id="btnResetForm" data-i18n="send_another">Send Another</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navigation Footer -->
+    <footer class="page-footer">
+        <a href="about.html" class="footer-link" data-i18n="about">About Us</a>
+        <span style="color: rgba(255,255,255,0.1)">•</span>
+        <a href="pricing.html" class="footer-link" data-i18n="pricing">Pricing</a>
+        <span style="color: rgba(255,255,255,0.1)">•</span>
+        <a href="workspace.html" class="footer-link" data-i18n="workspace">Workspace</a>
+    </footer>
+
+    <script>
+        const contactForm = document.getElementById('contactForm');
+        const formSection = document.getElementById('formSection');
+        const successSection = document.getElementById('successSection');
+        const btnResetForm = document.getElementById('btnResetForm');
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // In a production server, you would submit this via fetch to a contact API route.
+            // For now, we simulate a premium UX transition:
+            formSection.classList.add('hidden');
+            successSection.classList.remove('hidden');
+        });
+
+        btnResetForm.addEventListener('click', () => {
+            contactForm.reset();
+            successSection.classList.add('hidden');
+            formSection.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathpixo - Free Math OCR & Image to LaTeX Converter</title>
+    <meta name="description" content="Convert images, screenshots, and PDF documents of mathematical equations into clean, ready-to-compile LaTeX code instantly. Powered by advanced Gemini 2.5 Flash OCR.">
+    <meta name="keywords" content="math ocr, image to latex, pdf to latex, mathpix alternative, equation ocr, formula converter, handwritten math to latex, tikz block diagram, pgfplots, mathpix api free">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Mathpixo - Free Math OCR & Image to LaTeX Converter">
+    <meta property="og:description" content="Convert images, screenshots, and PDF documents of mathematical equations into clean, ready-to-compile LaTeX code instantly.">
+    <meta property="og:url" content="https://mathpixo.com/">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mathpixo - Free Math OCR & Image to LaTeX Converter">
+    <meta name="twitter:description" content="Convert images, screenshots, and PDF documents of mathematical equations into clean, ready-to-compile LaTeX code instantly.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <script src="translate.js"></script>
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- KaTeX Auto-render -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+    <!-- Background glowing elements -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+
+    <div class="app-layout">
+        <!-- Sidebar Panel (Left) -->
+        <aside class="sidebar">
+            <div class="sidebar-header" style="display: flex; gap: 0.75rem; align-items: flex-start; justify-content: space-between; width: 100%;">
+                <a href="index.html" style="display: flex; gap: 0.75rem; align-items: flex-start; text-decoration: none; color: inherit; flex-grow: 1; outline: none;">
+                    <i class="fa-solid fa-square-root-variable logo-icon" style="margin-top: 0.25rem; color: var(--primary);"></i>
+                    <div class="logo-text" style="flex-grow: 1;">
+                        <h2 style="margin: 0; font-size: 1.25rem;">Mathpix<span style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">o</span></h2>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.1rem;">
+                            <span class="tagline" data-i18n="tagline">Mathpix Companion</span>
+                        </div>
+                    </div>
+                </a>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; margin-top: 0.15rem;">
+                    <div style="display: flex; gap: 0.35rem; align-items: center;">
+                        <!-- Language Selector Dropdown -->
+                        <div class="lang-selector-container">
+                            <button class="btn-lang-toggle" id="langToggleBtn" title="Change Language" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 0.25rem; transition: var(--transition-smooth); font-size: 0.95rem; display: flex; align-items: center; gap: 0.2rem; outline: none;">
+                                <i class="fa-solid fa-globe" style="font-size: 0.85rem;"></i>
+                                <span id="currentLangCode" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">EN</span>
+                            </button>
+                            <div class="lang-dropdown hidden" id="langDropdown" style="top: 100%; right: 0;">
+                                <button class="lang-opt" data-lang="en">English</button>
+                                <button class="lang-opt" data-lang="fr">Français</button>
+                                <button class="lang-opt" data-lang="es">Español</button>
+                                <button class="lang-opt" data-lang="ar">العربية</button>
+                            </div>
+                        </div>
+
+                        <button id="themeToggleBtn" title="Toggle Theme" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 0.25rem; transition: var(--transition-smooth); font-size: 0.95rem; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <i class="fa-solid fa-sun" id="themeIcon"></i>
+                        </button>
+                    </div>
+                    <a href="pricing.html" style="font-size: 0.65rem; color: var(--accent); text-decoration: none; font-weight: 600; background: rgba(20, 184, 166, 0.08); padding: 0.15rem 0.35rem; border-radius: 4px; border: 1px solid var(--accent-glow); transition: var(--transition-smooth);" onmouseover="this.style.background='var(--accent)'; this.style.color='#07080c';" onmouseout="this.style.background='rgba(20, 184, 166, 0.08)'; this.style.color='var(--accent)';" data-i18n="plans">Plans</a>
+                </div>
+            </div>
+
+            <!-- Upload trigger inside sidebar -->
+            <div class="sidebar-upload-section">
+                <button class="btn btn-primary btn-full-width" id="sidebarUploadBtn">
+                    <i class="fa-solid fa-plus"></i> <span data-i18n="add_pages">Add PDF or Images</span>
+                </button>
+                <input type="file" id="multiFileInput" accept="image/*,application/pdf" multiple class="hidden">
+            </div>
+
+            <!-- List of Pages -->
+            <div class="sidebar-list-container">
+                <div class="list-section-header">
+                    <span>Documents & Pages</span>
+                    <span id="pageCount" class="badge">0 pages</span>
+                </div>
+                <ul class="file-list" id="fileList">
+                    <!-- Dynamic items will be added here -->
+                </ul>
+            </div>
+
+            <!-- User Account Section -->
+            <div class="sidebar-user-section" id="sidebarUserSection"></div>
+
+            <!-- Sidebar Actions (Export) -->
+            <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn btn-accent btn-full-width" id="exportCombinedBtn" disabled data-i18n="clear_all">
+                    Clear All
+                </button>
+                <div style="display: flex; justify-content: center; gap: 0.75rem; font-size: 0.75rem;">
+                    <a href="about.html" style="color: var(--text-muted); text-decoration: none; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="about">About</a>
+                    <span style="color: rgba(255,255,255,0.05)">|</span>
+                    <a href="pricing.html" style="color: var(--text-muted); text-decoration: none; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="pricing">Pricing</a>
+                    <span style="color: rgba(255,255,255,0.05)">|</span>
+                    <a href="contact.html" style="color: var(--text-muted); text-decoration: none; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="contact">Contact</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Panel (Right) -->
+        <main class="main-content">
+            <!-- Header Navigation -->
+            <header class="workspace-header glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 12px; border: 1px solid var(--card-border); flex-shrink: 0; z-index: 10;">
+                <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-folder-tree" style="color: var(--primary);"></i>
+                    <span data-i18n="workspace">Workspace</span>
+                </div>
+                <nav style="display: flex; gap: 1.75rem; align-items: center;">
+                    <a href="about.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="about">About</a>
+                    <a href="pricing.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="pricing">Pricing</a>
+                    <a href="contact.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: var(--transition-smooth);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'" data-i18n="contact">Contact</a>
+                </nav>
+            </header>
+
+            <!-- Empty State / Dashboard (Visible when no pages are uploaded) -->
+            <section id="emptyState" class="empty-state-view">
+                <div class="empty-state-card glass-card">
+                    <i class="fa-regular fa-folder-open empty-icon"></i>
+                    <h2 data-i18n="empty_workspace_title">Your Workspace is Empty</h2>
+                    <p data-i18n="empty_workspace_subtitle">Drop math images, screenshots, or PDF files here to begin your digitization project.</p>
+                    
+                    <div class="drag-upload-box" id="mainDragBox">
+                        <i class="fa-solid fa-cloud-arrow-up cloud-upload-icon"></i>
+                        <p class="drop-text-primary" data-i18n="drag_drop">Drag & drop images or PDFs here</p>
+                        <p class="drop-text-secondary" data-i18n="upload_files">or click to browse</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Active Workspace (Visible when files exist) -->
+            <section id="activeWorkspace" class="workspace-view hidden">
+                <!-- Topbar: File Info and Action Row -->
+                <div class="workspace-topbar glass-card">
+                    <div class="file-info">
+                        <i class="fa-regular fa-file-image file-type-icon"></i>
+                        <div>
+                            <h3 id="currentFileName">page_1.png</h3>
+                            <span id="currentFileSize" class="file-size-badge">120 KB</span>
+                        </div>
+                    </div>
+                    <div class="topbar-actions">
+                        <button id="convertAllBtn" class="btn btn-secondary" data-i18n="convert_all">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Convert All Pages
+                        </button>
+                        <button id="deletePageBtn" class="btn btn-danger" data-i18n="delete_page">
+                            <i class="fa-solid fa-trash-can"></i> Delete Page
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Workspace Grid -->
+                <div class="workspace-grid">
+                    <!-- Left: Source Preview -->
+                    <div class="workspace-left glass-card">
+                        <div class="section-title">
+                            <i class="fa-solid fa-image"></i>
+                            <h3>Source Preview</h3>
+                        </div>
+                        <div class="image-preview-container">
+                            <img id="imagePreview" src="" alt="Math Source">
+                            <iframe id="pdfPreview" class="hidden" src="" style="width: 100%; height: 100%; border: none; border-radius: 12px; background: white;"></iframe>
+                            <div class="image-overlay hidden" id="imageOverlay">
+                                <div class="spinner-container">
+                                    <div class="loading-spinner"></div>
+                                    <p id="overlayStatusText">Converting formula using Gemini...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="convertBtn" class="btn btn-primary btn-full-width" data-i18n="convert_page">
+                                <i class="fa-solid fa-play"></i> Convert This Page
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Editor & Live rendering Tabs -->
+                    <div class="workspace-right glass-card">
+                        <!-- Tab Headers -->
+                        <div class="workspace-tabs">
+                            <button class="tab-btn active" data-tab="latexTab" data-i18n="latex_editor">
+                                <i class="fa-solid fa-code"></i> LaTeX Code Editor
+                            </button>
+                            <button class="tab-btn" data-tab="combinedTab" data-i18n="full_document">
+                                <i class="fa-solid fa-book-open"></i> Full Document
+                            </button>
+                        </div>
+
+                        <!-- Tab Content 1: LaTeX Code View -->
+                        <div class="tab-content" id="latexTab" style="height: calc(100% - 48px); padding: 1rem;">
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; height: 100%;">
+                                <div class="section-header-row" style="margin: 0; flex-shrink: 0;">
+                                    <span data-i18n="latex_editor">LaTeX Code Editor</span>
+                                    <button id="copyBtn" class="btn btn-copy" disabled data-i18n="copy_latex">
+                                        <i class="fa-regular fa-copy"></i> Copy LaTeX
+                                    </button>
+                                </div>
+                                <div class="code-editor" style="flex-grow: 1; height: 100%;">
+                                    <textarea id="latexOutput" placeholder="Click 'Convert This Page' to extract formulas..." data-i18n="placeholder_editor" style="height: 100%; min-height: unset;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content 3: Full LaTeX Document -->
+                        <div class="tab-content hidden" id="combinedTab">
+                            <div class="section-header-row" style="gap: 0.5rem;">
+                                <span data-i18n="complete_project">Complete LaTeX Project Document (.tex)</span>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button id="overleafBtn" class="btn btn-copy" style="background: #47a147; border-color: #47a147; color: white;" data-i18n="open_overleaf">
+                                        <i class="fa-solid fa-leaf"></i> Open in Overleaf
+                                    </button>
+                                    <button id="downloadTexBtn" class="btn btn-copy" data-i18n="download_tex">
+                                        <i class="fa-solid fa-download"></i> Download .tex
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-editor combined-editor">
+                                <textarea id="combinedOutput" readonly placeholder="All converted pages will be merged here into a compilable document..." data-i18n="placeholder_combined"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay hidden" id="authModal">
+        <div class="auth-modal-card glass-card">
+            <button class="modal-close-btn" id="closeAuthBtn">&times;</button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLoginBtn">Sign In</button>
+                <button class="auth-tab" id="tabRegisterBtn">Sign Up</button>
+            </div>
+            
+            <!-- Sign In Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <div class="auth-error-msg hidden" id="loginError"></div>
+                <button type="submit" class="btn btn-primary btn-full-width">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign In
+                </button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="registerForm" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address</label>
+                    <input type="email" id="registerEmail" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Minimum 6 characters" required minlength="6">
+                </div>
+                <div class="auth-error-msg hidden" id="registerError"></div>
+                <button type="submit" class="btn btn-primary btn-full-width">
+                    <i class="fa-solid fa-user-plus"></i> Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings/Profile Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="auth-modal-card glass-card" style="max-width: 480px;">
+            <button class="modal-close-btn" id="closeSettingsBtn">&times;</button>
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff; font-weight: 700;">Account Settings</h2>
+            
+            <!-- User Profile Section -->
+            <div style="margin-bottom: 1.75rem;">
+                <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.75rem;">Profile Information</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 1rem; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Name:</span>
+                        <span style="color: #fff; font-weight: 500; font-size: 0.9rem;" id="settingsProfileName">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Email:</span>
+                        <span style="color: #fff; font-weight: 500; font-size: 0.9rem;" id="settingsProfileEmail">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Joined:</span>
+                        <span style="color: #fff; font-weight: 500; font-size: 0.9rem;" id="settingsProfileJoined">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Subscription / Billing Section -->
+            <div style="margin-bottom: 1.75rem;">
+                <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.75rem;">Subscription & Billing</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 1rem; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Current Plan:</span>
+                            <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 0.15rem; text-transform: capitalize;" id="settingsPlanName">Free Plan</div>
+                        </div>
+                        <a href="pricing.html" class="btn btn-accent" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; text-decoration: none; border-radius: 6px; color: #07080c; font-weight: 600;">Manage Plans</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extractions Usage Section -->
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">OCR Extractions</h3>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff;" id="settingsExtractionLabel">0 / 20</span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; overflow: hidden; margin-bottom: 0.5rem;">
+                    <div id="settingsExtractionProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); transition: width 0.4s ease-out; border-radius: 10px;"></div>
+                </div>
+                
+                <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;" id="settingsExtractionLimitText">
+                    Your free account is limited to 20 OCR extractions (images and PDFs) per month. Upgrade to Pro for 6,000 extractions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Logic -->
+    <script src="app.js"></script>
+</body>
+</html>

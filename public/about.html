@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About MathSnap AI - Advanced Multimodal LaTeX OCR Mission</title>
+    <meta name="description" content="Discover the mission of MathSnap AI. Learn how we utilize advanced multimodal AI models to translate images and PDF documents of formulas into high-quality LaTeX and TikZ code.">
+    <meta name="keywords" content="about mathsnap, math ocr technology, image to tikz conversion, latex formula scanner developers, pgfplots ocr details">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="About MathSnap AI - Advanced Multimodal LaTeX OCR">
+    <meta property="og:description" content="Translating complex scientific documents, plots, and formulas into compilable LaTeX & TikZ vector layouts.">
+    <meta property="og:url" content="https://mathsnap.com/about.html">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Base Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+            position: relative;
+        }
+
+        /* Nav Header */
+        .nav-header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+            z-index: 10;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            border-color: var(--primary-glow);
+            background: rgba(99, 102, 241, 0.08);
+            transform: translateX(-3px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-text h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Container */
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            z-index: 10;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        p {
+            color: #d1d5db;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 0.75rem;
+        }
+
+        /* Features List */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .feature-card h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-card h4 i {
+            color: var(--accent);
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Footer Links */
+        .page-footer {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 3.5rem;
+            z-index: 10;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        /* Background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @media (max-width: 650px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .content-container {
+                padding: 2rem 1.5rem;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+        }
+    <script src="translate.js"></script>
+</head>
+<body>
+    <!-- Background glowing elements -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Navigation Header -->
+    <header class="nav-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="logo-section">
+            <i class="fa-solid fa-square-root-variable logo-icon" style="font-size: 1.75rem;"></i>
+            <div class="logo-text">
+                <h1>Mathpix<span>o</span></h1>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <!-- Language Selector Dropdown -->
+            <div class="lang-selector-container">
+                <button class="btn-lang-toggle" id="langToggleBtn" title="Change Language" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); cursor: pointer; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; outline: none; transition: var(--transition-smooth); background: rgba(255, 255, 255, 0.02);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='#fff';" onmouseout="this.style.borderColor='var(--card-border)'; this.style.color='var(--text-muted)';">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="currentLangCode" style="font-weight: 700; text-transform: uppercase;">EN</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+                </button>
+                <div class="lang-dropdown hidden" id="langDropdown" style="top: calc(100% + 8px);">
+                    <button class="lang-opt" data-lang="en">English</button>
+                    <button class="lang-opt" data-lang="fr">Français</button>
+                    <button class="lang-opt" data-lang="es">Español</button>
+                    <button class="lang-opt" data-lang="ar">العربية</button>
+                </div>
+            </div>
+
+            <a href="workspace.html" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="back_workspace">Workspace</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="content-container">
+        <h2 data-i18n="about_title">About Mathpixo</h2>
+        <div class="subtitle" data-i18n="about_subtitle">Making mathematical content accessible and digitizable</div>
+        
+        <p data-i18n="about_desc1">
+            Mathpixo is a modern productivity tool built to solve a persistent bottleneck in STEM workflows: digitizing mathematics. We believe that equations, graphs, and control block diagrams should be as easy to type, search, and edit as plain text.
+        </p>
+
+        <p data-i18n="about_desc2">
+            By combining advanced multimodal AI (using Google Gemini 2.5 Flash) with custom rendering libraries, Mathpixo allows researchers, students, and educators to instantly convert screenshots, photos, and full PDF documents of formulas into high-quality, compilable LaTeX code.
+        </p>
+
+        <div class="section-title" data-i18n="core_tech">Core Technology</div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-wand-magic-sparkles"></i> OCR Translation</h4>
+                <p>Recognizes complex inline expressions, matrices, integrals, fractions, Greek letters, and alignment structures instantly.</p>
+            </div>
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-file-pdf"></i> PDF Document scanning</h4>
+                <p>Supports processing complete PDF documents and pages, letting you digitize full textbook pages or research sheets.</p>
+            </div>
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-chart-line"></i> TikZ & pgfplots Generation</h4>
+                <p>Converts function plots, coordinate axes, and control system block diagrams into clean TikZ/ pgfplots drawing vectors.</p>
+            </div>
+            <div class="feature-card">
+                <h4><i class="fa-solid fa-cloud"></i> Workspace Syncing</h4>
+                <p>Save your work history securely to your account. Edit and preview equations inside your persistent cloud Snip space.</p>
+            </div>
+        </div>
+
+        <div class="section-title" data-i18n="vision_title">Our Vision</div>
+        <p data-i18n="vision_desc">
+            Writing LaTeX code manually is time-consuming. Our vision is to eliminate the friction in scientific and technical writing, helping authors and students focus on the content rather than the syntax. Whether you are copy-pasting equations into Overleaf or building course lecture notes, Mathpixo is your ultimate companion.
+        </p>
+    </main>
+
+    <!-- Navigation Footer -->
+    <footer class="page-footer">
+        <a href="pricing.html" class="footer-link" data-i18n="pricing">Pricing</a>
+        <span style="color: rgba(255,255,255,0.1)">•</span>
+        <a href="contact.html" class="footer-link" data-i18n="contact">Contact</a>
+        <span style="color: rgba(255,255,255,0.1)">•</span>
+        <a href="workspace.html" class="footer-link" data-i18n="workspace">Workspace</a>
+    </footer>
+</body>
+</html>
