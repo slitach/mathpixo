@@ -1237,13 +1237,10 @@ registerForm.addEventListener('submit', async (e) => {
         if (!response.ok) {
             throw new Error(data.error || 'Registration failed.');
         }
+        currentUser = data.user;
         hideAuthModal();
-        if (data.previewUrl) {
-            alert(`[TEST SMTP MODE] Registration successful!\n\nSince no SMTP server is configured in your .env, here is the link to preview your simulated activation email:\n\n${data.previewUrl}\n\nClick OK to open the email preview in a new tab.`);
-            window.open(data.previewUrl, '_blank');
-        } else {
-            alert(data.message || 'Registration successful! Please check your email to activate your account.');
-        }
+        renderUserSection();
+        await fetchHistory();
     } catch (err) {
         registerError.textContent = err.message;
         registerError.classList.remove('hidden');

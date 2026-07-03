@@ -112,15 +112,18 @@ app.post('/api/auth/register', async (req, res) => {
   }
   try {
     const user = db.registerUser(email, password, name);
-
-    // Send activation email
-    const previewUrl = await emailService.sendConfirmationEmail(user.email, user.name, user.activationToken);
-
-    res.json({ 
-      success: true, 
-      message: 'Registration successful. Please check your email to activate your account.',
-      previewUrl
+    const token = db.createSession(user.id);
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
+
+    // Send welcome email in background
+    emailService.sendConfirmationEmail(user.email, user.name).catch(err => {
+      console.error('Failed to send registration confirmation email:', err);
+    });
+
+    res.json({ user });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

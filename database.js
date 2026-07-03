@@ -66,8 +66,7 @@ function registerUser(email, password, name) {
     email: lowerEmail,
     name: name || email.split('@')[0],
     password: hashPassword(password),
-    activated: false,
-    activationToken: crypto.randomBytes(32).toString('hex'),
+    activated: true,
     subscription: {
       plan: 'free',
       status: 'active',
@@ -106,10 +105,6 @@ function authenticateUser(email, password) {
 
   if (!user || !verifyPassword(password, user.password)) {
     throw new Error('Invalid email or password.');
-  }
-
-  if (user.activated === false) {
-    throw new Error('Your account is not activated yet. Please check your email for the activation link.');
   }
 
   // Schema fallbacks for existing users
