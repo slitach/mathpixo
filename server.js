@@ -214,7 +214,7 @@ app.post('/api/user/subscribe', requireAuth, (req, res) => {
 });
 
 // API endpoint to convert image/PDF to LaTeX
-app.post('/api/convert', optionalAuth, upload.single('image'), async (req, res) => {
+app.post('/api/convert', requireAuth, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an image or PDF file.' });

@@ -709,6 +709,12 @@ async function convertFile(id) {
     if (!fileObj || fileObj.status === 'converting') return;
     if (fileObj.status === 'converted' && !fileObj.file) return;
 
+    // Block conversion if user is not signed in
+    if (!currentUser) {
+        showAuthModal('login');
+        return;
+    }
+
     // Update status to converting
     fileObj.status = 'converting';
     fileObj.errorMsg = '';
@@ -807,6 +813,10 @@ async function convertFile(id) {
 
 // Convert all pending files
 async function convertAllPending() {
+    if (!currentUser) {
+        showAuthModal('login');
+        return;
+    }
     const pendingFiles = uploadedFiles.filter(f => f.status === 'pending' || f.status === 'error');
     if (pendingFiles.length === 0) return;
 
