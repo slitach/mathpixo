@@ -36,6 +36,7 @@ const combinedOutput = document.getElementById('combinedOutput');
 const downloadTexBtn = document.getElementById('downloadTexBtn');
 const downloadDocBtn = document.getElementById('downloadDocBtn');
 const downloadPageDocBtn = document.getElementById('downloadPageDocBtn');
+const downloadPageTexBtn = document.getElementById('downloadPageTexBtn');
 
 // ==========================================================================
 // Initialization & Events
@@ -139,6 +140,44 @@ downloadTexBtn.addEventListener('click', () => {
     link.click();
     URL.revokeObjectURL(link.href);
 });
+
+// Download page .tex handler
+if (downloadPageTexBtn) {
+    downloadPageTexBtn.addEventListener('click', () => {
+        if (!activeFileId) return;
+        const file = uploadedFiles.find(f => f.id === activeFileId);
+        if (!file || file.status !== 'converted') return;
+
+        // Build a complete compilable LaTeX document for just this single page
+        const doc = `\\documentclass{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{amsmath}
+\\usepackage{amssymb}
+\\usepackage{graphicx}
+
+\\title{Mathpixo - Extracted Mathematics}
+\\author{Compiled Document}
+\\date{\\today}
+
+\\begin{document}
+\\maketitle
+
+% File: ${file.name}
+${file.latex}
+
+\\end{document}
+`;
+
+        const blob = new Blob([doc], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        
+        const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        link.download = `${nameWithoutExt}.tex`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+}
 
 // Download page .doc handler
 if (downloadPageDocBtn) {
@@ -613,6 +652,9 @@ function selectFile(id) {
     if (downloadPageDocBtn) {
         downloadPageDocBtn.disabled = (file.status !== 'converted');
     }
+    if (downloadPageTexBtn) {
+        downloadPageTexBtn.disabled = (file.status !== 'converted');
+    }
 
     // Update Live Preview Tab
     renderFormula(file.latex, file.status, file.errorMsg);
@@ -684,6 +726,9 @@ async function convertFile(id) {
         if (downloadPageDocBtn) {
             downloadPageDocBtn.disabled = true;
         }
+        if (downloadPageTexBtn) {
+            downloadPageTexBtn.disabled = true;
+        }
     }
 
     const formData = new FormData();
@@ -728,6 +773,9 @@ async function convertFile(id) {
             copyBtn.disabled = false;
             if (downloadPageDocBtn) {
                 downloadPageDocBtn.disabled = false;
+            }
+            if (downloadPageTexBtn) {
+                downloadPageTexBtn.disabled = false;
             }
             renderFormula(data.latex, 'converted');
             
