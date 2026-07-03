@@ -105,7 +105,7 @@ function fileToGenerativePart(buffer, mimeType) {
 }
 
 // User Authentication Endpoints
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
@@ -113,12 +113,14 @@ app.post('/api/auth/register', (req, res) => {
   try {
     const user = db.registerUser(email, password, name);
 
-    // Send activation email asynchronously
-    emailService.sendConfirmationEmail(user.email, user.name, user.activationToken).catch(err => {
-      console.error('Failed to send registration confirmation email:', err);
-    });
+    // Send activation email
+    const previewUrl = await emailService.sendConfirmationEmail(user.email, user.name, user.activationToken);
 
-    res.json({ success: true, message: 'Registration successful. Please check your email to activate your account.' });
+    res.json({ 
+      success: true, 
+      message: 'Registration successful. Please check your email to activate your account.',
+      previewUrl
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

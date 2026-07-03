@@ -1238,7 +1238,12 @@ registerForm.addEventListener('submit', async (e) => {
             throw new Error(data.error || 'Registration failed.');
         }
         hideAuthModal();
-        alert(data.message || 'Registration successful! Please check your email to activate your account.');
+        if (data.previewUrl) {
+            alert(`[TEST SMTP MODE] Registration successful!\n\nSince no SMTP server is configured in your .env, here is the link to preview your simulated activation email:\n\n${data.previewUrl}\n\nClick OK to open the email preview in a new tab.`);
+            window.open(data.previewUrl, '_blank');
+        } else {
+            alert(data.message || 'Registration successful! Please check your email to activate your account.');
+        }
     } catch (err) {
         registerError.textContent = err.message;
         registerError.classList.remove('hidden');
