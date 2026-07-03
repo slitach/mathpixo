@@ -1188,6 +1188,28 @@ function dataURLtoFile(dataurl, filename, type) {
 }
 
 async function initApp() {
+    if (window.location.protocol === 'file:') {
+        const warningMsg = "Warning: Mathpixo is running from a local file protocol (file://). To use the Gemini OCR conversion backend, you must run the server using 'npm start' and visit http://localhost:8000 in your browser.";
+        
+        // Render visible warning banner
+        const warningBanner = document.createElement('div');
+        warningBanner.style.background = 'var(--error, #ef4444)';
+        warningBanner.style.color = '#fff';
+        warningBanner.style.padding = '12px';
+        warningBanner.style.textAlign = 'center';
+        warningBanner.style.fontWeight = 'bold';
+        warningBanner.style.fontSize = '0.95rem';
+        warningBanner.style.position = 'fixed';
+        warningBanner.style.top = '0';
+        warningBanner.style.left = '0';
+        warningBanner.style.width = '100%';
+        warningBanner.style.zIndex = '99999';
+        warningBanner.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+        warningBanner.textContent = warningMsg;
+        document.body.appendChild(warningBanner);
+        document.body.style.paddingTop = '50px';
+    }
+
     try {
         const response = await fetch('/api/auth/me');
         const data = await response.json();
