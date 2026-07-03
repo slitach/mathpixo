@@ -35,6 +35,7 @@ const mathRenderArea = document.getElementById('mathRenderArea');
 const combinedOutput = document.getElementById('combinedOutput');
 const downloadTexBtn = document.getElementById('downloadTexBtn');
 const downloadDocBtn = document.getElementById('downloadDocBtn');
+const downloadPageDocBtn = document.getElementById('downloadPageDocBtn');
 
 // ==========================================================================
 // Initialization & Events
@@ -138,6 +139,54 @@ downloadTexBtn.addEventListener('click', () => {
     link.click();
     URL.revokeObjectURL(link.href);
 });
+
+// Download page .doc handler
+if (downloadPageDocBtn) {
+    downloadPageDocBtn.addEventListener('click', () => {
+        if (!activeFileId) return;
+        const file = uploadedFiles.find(f => f.id === activeFileId);
+        if (!file || file.status !== 'converted') return;
+
+        const bodyContent = `<h2 style="color: #2b579a; font-family: 'Segoe UI Semibold', sans-serif; font-size: 16pt; margin-top: 12px; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">${file.name}</h2>` + 
+                            convertLatexToHtmlAndMathml(file.latex);
+
+        const docContent = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset="utf-8">
+  <title>${file.name}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+      <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    body { font-family: 'Segoe UI', 'Calibri', Arial, sans-serif; line-height: 1.5; font-size: 11.0pt; }
+    p { margin: 0in; margin-bottom: 8.0pt; }
+    h1, h2, h3 { color: #2b579a; font-family: 'Segoe UI Semibold', sans-serif; }
+    code { font-family: 'Consolas', 'Courier New', monospace; background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  ${bodyContent}
+</body>
+</html>
+        `;
+
+        const blob = new Blob(['\ufeff' + docContent], { type: 'application/msword;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        
+        const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        link.download = `${nameWithoutExt}.doc`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+}
 
 // Download .doc handler
 if (downloadDocBtn) {
@@ -552,6 +601,9 @@ function selectFile(id) {
     // Set LaTeX output
     latexOutput.value = file.latex;
     copyBtn.disabled = (file.status !== 'converted');
+    if (downloadPageDocBtn) {
+        downloadPageDocBtn.disabled = (file.status !== 'converted');
+    }
 
     // Update Live Preview Tab
     renderFormula(file.latex, file.status, file.errorMsg);
@@ -660,6 +712,9 @@ async function convertFile(id) {
         if (activeFileId === fileObj.id) {
             latexOutput.value = data.latex;
             copyBtn.disabled = false;
+            if (downloadPageDocBtn) {
+                downloadPageDocBtn.disabled = false;
+            }
             renderFormula(data.latex, 'converted');
             
             const isPdf = fileObj.file ? (fileObj.file.type === 'application/pdf') : fileObj.name.toLowerCase().endsWith('.pdf');
