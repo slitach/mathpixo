@@ -364,6 +364,15 @@ convertBtn.addEventListener('click', () => {
     }
 });
 
+// Click on preview image to convert
+if (imagePreview) {
+    imagePreview.addEventListener('click', () => {
+        if (activeFileId) {
+            convertFile(activeFileId);
+        }
+    });
+}
+
 // Convert all pending pages
 convertAllBtn.addEventListener('click', convertAllPending);
 
@@ -661,15 +670,20 @@ async function convertFile(id) {
     // Update status to converting
     fileObj.status = 'converting';
     fileObj.errorMsg = '';
+    fileObj.latex = ''; // Clean previous latex output
     renderSidebar();
 
     // Update workspace if this file is currently active
     if (activeFileId === id) {
+        latexOutput.value = ''; // Clean textarea output immediately
         const activeLang = localStorage.getItem("lang") || "en";
         const dict = (typeof i18n !== 'undefined' && i18n[activeLang]) ? i18n[activeLang] : {};
         overlayStatusText.textContent = dict.converting_overlay || 'Extracting formulas using Gemini...';
         imageOverlay.classList.remove('hidden');
         convertBtn.disabled = true;
+        if (downloadPageDocBtn) {
+            downloadPageDocBtn.disabled = true;
+        }
     }
 
     const formData = new FormData();
