@@ -34,6 +34,7 @@ const mathRenderArea = document.getElementById('mathRenderArea');
 
 const combinedOutput = document.getElementById('combinedOutput');
 const downloadTexBtn = document.getElementById('downloadTexBtn');
+const downloadDocBtn = document.getElementById('downloadDocBtn');
 
 // ==========================================================================
 // Initialization & Events
@@ -137,6 +138,175 @@ downloadTexBtn.addEventListener('click', () => {
     link.click();
     URL.revokeObjectURL(link.href);
 });
+
+// Download .doc handler
+if (downloadDocBtn) {
+    downloadDocBtn.addEventListener('click', () => {
+        const converted = uploadedFiles.filter(f => f.status === 'converted');
+        if (converted.length === 0) return;
+
+        let bodyContent = '';
+        converted.forEach((file, index) => {
+            if (index > 0) {
+                bodyContent += '<br clear="all" style="page-break-before: always; mso-break-type: section-break;" />';
+            }
+            bodyContent += `<h2 style="color: #2b579a; font-family: 'Segoe UI Semibold', sans-serif; font-size: 16pt; margin-top: 24px; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">Page ${index + 1}: ${file.name}</h2>`;
+            bodyContent += convertLatexToHtmlAndMathml(file.latex);
+        });
+
+        const docContent = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset="utf-8">
+  <title>Mathpixo Document</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+      <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    body { font-family: 'Segoe UI', 'Calibri', Arial, sans-serif; line-height: 1.5; font-size: 11.0pt; }
+    p { margin: 0in; margin-bottom: 8.0pt; }
+    h1, h2, h3 { color: #2b579a; font-family: 'Segoe UI Semibold', sans-serif; }
+    code { font-family: 'Consolas', 'Courier New', monospace; background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  ${bodyContent}
+</body>
+</html>
+        `;
+
+        const blob = new Blob(['\ufeff' + docContent], { type: 'application/msword;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'mathpixo_document.doc';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+}
+
+function convertLatexToHtmlAndMathml(latex) {
+    // 1. Clean out package imports, document start/end, comments, and metadata
+    let lines = latex.split('\n');
+    let cleanedLines = lines.filter(line => {
+        const trimmed = line.trim();
+        return !trimmed.startsWith('%') && !trimmed.startsWith('\\usepackage') &&
+               !trimmed.startsWith('\\documentclass') && !trimmed.startsWith('\\begin{document}') &&
+               !trimmed.startsWith('\\end{document}') && !trimmed.startsWith('\\title') &&
+               !trimmed.startsWith('\\author') && !trimmed.startsWith('\\date') &&
+               !trimmed.startsWith('\\maketitle');
+    });
+    let text = cleanedLines.join('\n').trim();
+
+    let placeholders = [];
+    let placeholderCounter = 0;
+
+    function addPlaceholder(mathCode, isBlock) {
+        const id = `___MATH_PLACEHOLDER_${placeholderCounter++}___`;
+        placeholders.push({ id, mathCode, isBlock });
+        return id;
+    }
+
+    // 2. Extract block environments: \begin{align*} ... \end{align*}, etc.
+    const environments = ['align\\*?', 'equation\\*?', 'gather\\*?', 'matrix', 'array', 'tikzpicture', 'blox', 'axis'];
+    environments.forEach(envPattern => {
+        const regex = new RegExp(`\\\\begin{(${envPattern})}([\\s\\S]*?)\\\\end{\\1}`, 'g');
+        text = text.replace(regex, (match) => {
+            return '\n\n' + addPlaceholder(match, true) + '\n\n';
+        });
+    });
+
+    // 3. Match \[ ... \] display math
+    text = text.replace(/\\\[([\s\S]*?)\\\]/g, (match, math) => {
+        return '\n\n' + addPlaceholder(math, true) + '\n\n';
+    });
+
+    // 4. Match $$ ... $$ display math
+    text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+        return '\n\n' + addPlaceholder(match, true) + '\n\n';
+    });
+
+    // 5. Match \( ... \) inline math
+    text = text.replace(/\\\(([\s\S]*?)\\\)/g, (match, math) => {
+        return addPlaceholder(math, false);
+    });
+
+    // 6. Match $ ... $ inline math (excluding escaped \$)
+    text = text.replace(/(?<!\\)\$((?:\\\$|[^$])+)(?<!\\)\$/g, (match, math) => {
+        return addPlaceholder(math, false);
+    });
+
+    // 7. Escape HTML tags in text
+    text = text.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+
+    // 8. Split by double newlines into paragraph blocks
+    let paragraphs = text.split(/\n\s*\n+/);
+    let htmlParagraphs = paragraphs.map(p => {
+        let pTrimmed = p.trim();
+        if (!pTrimmed) return '';
+        
+        // Single newlines inside a paragraph are converted to soft line breaks
+        let content = pTrimmed.replace(/\n/g, '<br/>');
+        return `<p style="margin-top: 0px; margin-bottom: 8.0pt; line-height: 1.5;">${content}</p>`;
+    });
+    let html = htmlParagraphs.join('\n');
+
+    // 9. Process placeholders back with KaTeX MathML elements
+    placeholders.forEach(placeholder => {
+        let mathmlStr = '';
+        const isTikzOrBlockDiagram = placeholder.mathCode.includes('\\begin{tikzpicture}') || 
+                                     placeholder.mathCode.includes('\\begin{blox}') || 
+                                     placeholder.mathCode.includes('\\begin{axis}');
+        
+        if (isTikzOrBlockDiagram) {
+            // Word cannot compile/render TikZ directly. We can export it inside a styled code block.
+            mathmlStr = `<div style="background-color: #f3f4f6; border-left: 3px solid #2b579a; padding: 10px; margin: 12px 0; font-family: Consolas, monospace; font-size: 9pt; white-space: pre-wrap;">% [TikZ Diagram - Raw Code]\n${placeholder.mathCode}</div>`;
+        } else {
+            try {
+                // Remove LaTeX formatting wrapper if KaTeX throws error on block delimiters inside equation code
+                let formula = placeholder.mathCode.trim();
+                if (formula.startsWith('\\[') && formula.endsWith('\\]')) {
+                    formula = formula.substring(2, formula.length - 2);
+                } else if (formula.startsWith('$$') && formula.endsWith('$$')) {
+                    formula = formula.substring(2, formula.length - 2);
+                } else if (formula.startsWith('$') && formula.endsWith('$')) {
+                    formula = formula.substring(1, formula.length - 1);
+                } else if (formula.startsWith('\\(') && formula.endsWith('\\)')) {
+                    formula = formula.substring(2, formula.length - 2);
+                }
+
+                // Render strictly to MathML
+                mathmlStr = window.katex.renderToString(formula, {
+                    displayMode: placeholder.isBlock,
+                    output: 'mathml',
+                    throwOnError: false,
+                    trust: true
+                });
+
+                if (placeholder.isBlock) {
+                    mathmlStr = `<div style="text-align: center; margin-top: 12px; margin-bottom: 12px;">${mathmlStr}</div>`;
+                } else {
+                    mathmlStr = ` <span>${mathmlStr}</span> `;
+                }
+            } catch (err) {
+                console.error('KaTeX MathML render error:', err);
+                mathmlStr = ` <code>${placeholder.mathCode}</code> `;
+            }
+        }
+        
+        // Safely replace the placeholder
+        html = html.replace(placeholder.id, mathmlStr);
+    });
+
+    return html;
+}
 
 // Convert current page
 convertBtn.addEventListener('click', () => {

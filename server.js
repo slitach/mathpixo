@@ -186,7 +186,9 @@ app.delete('/api/history/:id', requireAuth, (req, res) => {
   try {
     const relativePath = db.deleteHistoryEntry(req.params.id, req.userId);
     if (relativePath) {
-      const absolutePath = path.join(__dirname, 'public', relativePath);
+      const absolutePath = isVercel
+        ? path.join('/tmp', 'uploads', path.basename(relativePath))
+        : path.join(__dirname, 'public', relativePath);
       if (fs.existsSync(absolutePath)) {
         fs.unlinkSync(absolutePath);
       }

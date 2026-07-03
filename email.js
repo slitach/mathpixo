@@ -32,6 +32,7 @@ async function sendConfirmationEmail(toEmail, name) {
   try {
     const transporter = await createTransporter();
     const fromEmail = process.env.SMTP_FROM || '"Mathpixo" <no-reply@mathpixo.com>';
+    const appUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
     
     const htmlContent = `
       <div style="font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #07080c; color: #f3f4f6; padding: 2rem; max-width: 600px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.25);">
@@ -51,7 +52,7 @@ async function sendConfirmationEmail(toEmail, name) {
         </div>
         
         <div style="text-align: center; margin-bottom: 2rem;">
-          <a href="http://localhost:8000" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; display: inline-block; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
+          <a href="${appUrl}" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; display: inline-block; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
             Go to Workspace
           </a>
         </div>
@@ -70,7 +71,7 @@ async function sendConfirmationEmail(toEmail, name) {
       to: toEmail,
       subject: 'Welcome to Mathpixo! 🧮✨',
       html: htmlContent,
-      text: `Welcome to Mathpixo, ${name}! Your account is now active. Visit http://localhost:8000 to start converting your equations.`
+      text: `Welcome to Mathpixo, ${name}! Your account is now active. Visit ${appUrl} to start converting your equations.`
     };
 
     const info = await transporter.sendMail(mailOptions);
