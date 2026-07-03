@@ -112,20 +112,29 @@ app.post('/api/auth/register', (req, res) => {
   }
   try {
     const user = db.registerUser(email, password, name);
-    const token = db.createSession(user.id);
-    res.cookie('session_token', token, {
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
 
-    // Send email confirmation asynchronously
-    emailService.sendConfirmationEmail(email, user.name).catch(err => {
+    // Send activation email asynchronously
+    emailService.sendConfirmationEmail(user.email, user.name, user.activationToken).catch(err => {
       console.error('Failed to send registration confirmation email:', err);
     });
 
-    res.json({ user });
+    res.json({ success: true, message: 'Registration successful. Please check your email to activate your account.' });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/auth/activate', (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    return res.status(400).send('Activation token is missing.');
+  }
+  try {
+    db.activateUser(token);
+    // Redirect back to workspace with activation success query param
+    res.redirect('/workspace.html?activated=true');
+  } catch (err) {
+    res.status(400).send(`Activation failed: ${err.message}`);
   }
 });
 

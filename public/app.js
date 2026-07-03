@@ -1237,10 +1237,8 @@ registerForm.addEventListener('submit', async (e) => {
         if (!response.ok) {
             throw new Error(data.error || 'Registration failed.');
         }
-        currentUser = data.user;
         hideAuthModal();
-        renderUserSection();
-        await fetchHistory();
+        alert(data.message || 'Registration successful! Please check your email to activate your account.');
     } catch (err) {
         registerError.textContent = err.message;
         registerError.classList.remove('hidden');
@@ -1315,6 +1313,15 @@ function dataURLtoFile(dataurl, filename, type) {
 }
 
 async function initApp() {
+    // Check for account activation query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('activated') === 'true') {
+        alert("Your account has been successfully activated! You can now log in.");
+        // Clear the query parameter so refreshing doesn't trigger the alert again
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showAuthModal('login');
+    }
+
     if (window.location.protocol === 'file:') {
         const warningMsg = "Warning: Mathpixo is running from a local file protocol (file://). To use the Gemini OCR conversion backend, you must run the server using 'npm start' and visit http://localhost:8000 in your browser.";
         
