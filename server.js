@@ -263,12 +263,26 @@ Follow these strict guidelines based on the type of content detected:
    - Use standard amsmath environments (e.g., align*, equation, cases).
    - Ensure precise spacing, correct Greek letters, and accurate subscript/superscript placement.
 
-2. FOR CURVES, GRAPHS & DIAGRAMS:
+2. FOR CURVES, GRAPHS & DIAGRAMS (TIKZ & PGFPLOTS):
    - Use the tikz and pgfplots packages.
-   - Accurately recreate the coordinate system, grids, axes, labels, and tick marks.
-   - Include all necessary TikZ libraries (e.g., \`\\usetikzlibrary{positioning, arrows.meta, arrows}\`) in the preamble to ensure full compilability.
-   - CRITICAL: Never use the word \`auto\` as a value for dimensions or positioning shifts (e.g., do NOT use \`xshift=auto\`, \`yshift=auto\`, \`below=auto\`, \`above=auto\`, \`left=auto\`, or \`right=auto\`). Use explicit units (e.g., \`2cm\`, \`15mm\`, \`0pt\`) or standard node placement (e.g., \`below=of node\`, not \`below=auto of node\`). Do not confuse TikZ options with CSS values.
+   - Include all necessary TikZ libraries (e.g., \`\\usetikzlibrary{positioning, arrows.meta, arrows, angles, quotes, calc}\`) in the preamble to ensure full compilability.
+   - FOR GRAPHS & FUNCTIONS (PGFPLOTS):
+     * Always use the \`\\begin{axis} ... \\end{axis}\` environment inside a tikzpicture.
+     * Define explicit limits based on the image ticks (e.g., \`xmin\`, \`xmax\`, \`ymin\`, \`ymax\`).
+     * Set \`axis lines=middle\` or \`axis lines=center\` and label the axes (\`xlabel=$x$\`, \`ylabel=$y$\`).
+     * Recreate grids with \`grid=both\`, \`grid style={dashed, gray!30}\`.
+     * For curves, use \`\\addplot[domain=..., samples=150, blue, thick] {<function>};\`, or interpolate coordinates if it is a custom curve: \`\\addplot[smooth, blue, thick] coordinates {(x1, y1) (x2, y2) ...};\`.
+   - FOR FLOWCHARTS & BLOCK DIAGRAMS (TIKZ):
+     * Define reusable node styles at the start (e.g., \`\\tikzset{block/.style={draw, rectangle, ...}}\`).
+     * Use relative positioning from the \`positioning\` library (e.g., \`right=of A\`, \`below=1.5cm of B\`) to keep elements aligned and centered, instead of guessing absolute coordinates.
+     * For connecting lines, use orthogonal paths (\`-|\` or \`|-\n\`) or straight paths (\`--\`) with arrows (e.g., \`\\draw[->] (A) -| (B);\`).
+   - FOR GEOMETRIC SHAPES:
+     * Define key intersection points using coordinates (e.g., \`\\coordinate (A) at (0,0);\`).
+     * Draw closed shapes using \`cycle\` at the end of the path (e.g., \`\\draw (A) -- (B) -- (C) -- cycle;\`).
+     * Recreate angles using the \`angles\` and \`quotes\` libraries for precise annotations.
+   - STRICT SYNTAX: Never use the word \`auto\` as a value for dimensions or positioning shifts (e.g., do NOT use \`xshift=auto\`, \`yshift=auto\`, \`below=auto\`, \`above=auto\`, \`left=auto\`, or \`right=auto\`). Use explicit units (e.g., \`2cm\`, \`15mm\`, \`0pt\`) or standard node placement (e.g., \`below=of node\`, not \`below=auto of node\`). Do not confuse TikZ options with CSS values.
    - For arrow heads, prefer modern TikZ keys from \`arrows.meta\` (like \`Stealth\`, \`Latex\`) or if legacy arrow shapes (like \`latex'\`, \`stealth'\`) are used, you MUST explicitly include \`\\usetikzlibrary{arrows}\` in the preamble.
+   - For asymmetric node padding, use separate \`inner xsep\` and \`inner ysep\` keys instead of \`inner sep=Xpt Ypt\`.
 
 3. FOR PDFS & TEXT DOCUMENTS:
    - Replicate the exact visual hierarchy (headings, paragraphs, bullet points).

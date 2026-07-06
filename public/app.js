@@ -1017,13 +1017,13 @@ function generateCombinedDocument() {
 
     if (allCodeText.includes('\\begin{tikzpicture}') || allCodeText.includes('\\tikzpicture')) {
         packages.push('\\usepackage{tikz}');
-        packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows}');
+        packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows, angles, quotes, calc}');
     }
     if (allCodeText.includes('\\begin{blox}') || allCodeText.includes('\\bXInput')) {
         // Blox requires TikZ
         if (!packages.includes('\\usepackage{tikz}')) {
             packages.push('\\usepackage{tikz}');
-            packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows}');
+            packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows, angles, quotes, calc}');
         }
         packages.push('\\usepackage{blox}');
     }
