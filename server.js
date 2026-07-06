@@ -79,7 +79,13 @@ if (isVercel) {
 // Authentication Middlewares
 function requireAuth(req, res, next) {
   const token = req.cookies['session_token'];
-  const userId = token ? db.getSession(token) : null;
+  let userId = token ? db.getSession(token) : null;
+  
+  // Auto-login on localhost for local testing/development convenience
+  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+    userId = 'user_local_dev';
+  }
+
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized. Please log in.' });
   }
@@ -89,7 +95,13 @@ function requireAuth(req, res, next) {
 
 function optionalAuth(req, res, next) {
   const token = req.cookies['session_token'];
-  const userId = token ? db.getSession(token) : null;
+  let userId = token ? db.getSession(token) : null;
+  
+  // Auto-login on localhost for local testing/development convenience
+  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+    userId = 'user_local_dev';
+  }
+
   req.userId = userId;
   next();
 }
@@ -172,7 +184,22 @@ app.post('/api/auth/logout', (req, res) => {
 
 app.get('/api/auth/me', (req, res) => {
   const token = req.cookies['session_token'];
-  const userId = token ? db.getSession(token) : null;
+  let userId = token ? db.getSession(token) : null;
+  
+  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+    return res.json({ 
+      user: {
+        id: 'user_local_dev',
+        email: 'local-dev@example.com',
+        name: 'Local Developer',
+        activated: true,
+        subscription: { plan: 'free', status: 'active', updatedAt: new Date().toISOString() },
+        extractionsCount: 0,
+        createdAt: new Date().toISOString()
+      } 
+    });
+  }
+
   if (!userId) {
     return res.json({ user: null });
   }
@@ -227,6 +254,30 @@ app.post('/api/user/subscribe', requireAuth, (req, res) => {
   }
 });
 
+// Strict system prompt for LaTeX conversion
+const SYSTEM_PROMPT = `You are an expert LaTeX developer, mathematician, and technical typesetter. Your task is to analyze the provided input (which may be an image, a PDF page, a technical diagram, a plotted curve, or complex mathematical equations) and convert it into perfect, compilable LaTeX code.
+
+Follow these strict guidelines based on the type of content detected:
+
+1. FOR EQUATIONS & FORMULAS:
+   - Use standard amsmath environments (e.g., align*, equation, cases).
+   - Ensure precise spacing, correct Greek letters, and accurate subscript/superscript placement.
+
+2. FOR CURVES, GRAPHS & DIAGRAMS:
+   - Use the tikz and pgfplots packages.
+   - Accurately recreate the coordinate system, grids, axes, labels, and tick marks.
+   - Include all necessary TikZ libraries (e.g., \`\\usetikzlibrary{positioning, arrows.meta, arrows}\`) in the preamble to ensure full compilability.
+   - CRITICAL: Never use the word \`auto\` as a value for dimensions or positioning shifts (e.g., do NOT use \`xshift=auto\`, \`yshift=auto\`, \`below=auto\`, \`above=auto\`, \`left=auto\`, or \`right=auto\`). Use explicit units (e.g., \`2cm\`, \`15mm\`, \`0pt\`) or standard node placement (e.g., \`below=of node\`, not \`below=auto of node\`). Do not confuse TikZ options with CSS values.
+   - For arrow heads, prefer modern TikZ keys from \`arrows.meta\` (like \`Stealth\`, \`Latex\`) or if legacy arrow shapes (like \`latex'\`, \`stealth'\`) are used, you MUST explicitly include \`\\usetikzlibrary{arrows}\` in the preamble.
+
+3. FOR PDFS & TEXT DOCUMENTS:
+   - Replicate the exact visual hierarchy (headings, paragraphs, bullet points).
+   - Use tabular or booktabs for tables.
+
+4. CODE STRUCTURE & OUTPUT CONSTRAINTS:
+   - Provide a complete, compilable document using \\documentclass[tikz,border=5mm]{standalone} or \\documentclass{article}.
+   - Output ONLY the exact LaTeX code enclosed in a \`\`\`latex \`\`\` block. Do not include any explanations.`;
+
 // API endpoint to convert image/PDF to LaTeX
 app.post('/api/convert', requireAuth, upload.single('image'), async (req, res) => {
   try {
@@ -240,37 +291,27 @@ app.post('/api/convert', requireAuth, upload.single('image'), async (req, res) =
       });
     }
 
-    // Use gemini-2.5-flash for fast and accurate multimodal tasks
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-    const prompt = `You are a high-accuracy mathematical OCR and LaTeX conversion system.
-Analyze the uploaded image or document of mathematical expressions, formulas, control block diagrams, or function curves/graphs.
-Extract all math equations, text, symbols, structures, diagrams, coordinate systems, or function plots, and convert them to standard, high-quality LaTeX code.
-
-Provide ONLY the raw LaTeX code in the response.
-CRITICAL RULES:
-1. Do NOT wrap the code in Markdown code blocks (do NOT use \\\`\\\`\\\`latex or similar).
-2. Do NOT write explanations, greeting, or backticks.
-3. Return only the raw LaTeX code that can be directly pasted into a LaTeX editor (like Overleaf or TeXstudio).
-4. For inline formulas, wrap them in $...$.
-5. For standalone or display equations, wrap them in standard LaTeX block format:
-   \\[
-   <equation>
-   \\]
-   (Do NOT use $$...$$ as it is deprecated in modern LaTeX).
-6. If there are multiple aligned equations, use \\begin{align*} ... \\end{align*}.
-7. If the image contains a control system block diagram, represent it using the LaTeX 'blox' package (built on TikZ) or standard TikZ code.
-8. If the image contains a mathematical curve, function graph, or coordinate plot, represent it using the LaTeX 'pgfplots' package (built on TikZ) or standard TikZ code.
-9. Comment at the very top of the output which LaTeX packages are required to compile the generated code (e.g. % Required packages: \\usepackage{pgfplots}, \\usepackage{blox}, \\usepackage{tikz}, \\usepackage{amsmath}, etc.).
-10. Ensure all symbols (like Greek letters, integrals, matrices, fractions) are correctly escaped and formatted.`;
+    // Use gemini-2.5-flash for fast and accurate multimodal tasks with custom system prompt
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.5-flash',
+      systemInstruction: SYSTEM_PROMPT
+    });
 
     // Read file into buffer from disk storage
     const fileBuffer = fs.readFileSync(req.file.path);
     const imagePart = fileToGenerativePart(fileBuffer, req.file.mimetype);
 
-    const result = await model.generateContent([prompt, imagePart]);
+    const result = await model.generateContent([
+      "Convert this file to LaTeX exactly as instructed.", 
+      imagePart
+    ]);
     const response = await result.response;
-    const latexText = response.text().trim();
+    let latexText = response.text().trim();
+
+    // Clean markdown code blocks if the model wrapped it (e.g. ```latex ... ```)
+    if (latexText.startsWith('```')) {
+      latexText = latexText.replace(/^```(?:latex)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    }
 
     const relativePath = `/uploads/${req.file.filename}`;
 
@@ -296,6 +337,132 @@ CRITICAL RULES:
   } catch (error) {
     console.error('Error during conversion:', error);
     res.status(500).json({ error: 'Failed to process the file. ' + error.message });
+  }
+});
+
+// API endpoint to extract diagram bounding box from an image/PDF
+app.post('/api/extract-diagram', requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please upload an image or PDF file.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ 
+        error: 'Gemini API key is not configured on the server. Please add it to your .env file.' 
+      });
+    }
+
+    // Use gemini-2.5-flash for fast and accurate computer vision tasks
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const prompt = `You are an expert computer vision assistant specializing in educational materials. Your task is to analyze the provided image (which may be a full document, worksheet, or exam paper) and locate any mathematical figures, physics diagrams, or charts.
+
+Follow these strict output rules:
+1. Locate the primary diagram/figure in the image. Ignore standard text paragraphs, headers, and page numbers.
+2. Calculate the bounding box for this diagram.
+3. Output strictly in valid JSON format representing the bounding box percentages relative to the image size. 
+4. Do not include any markdown formatting, explanations, or conversational text.
+
+Expected JSON format:
+{
+  "diagram_found": true,
+  "type": "geometry_figure", // e.g., geometry_figure, function_curve, physics_circuit
+  "bounding_box": {
+    "x_min_percent": 0.15,
+    "y_min_percent": 0.20,
+    "width_percent": 0.40,
+    "height_percent": 0.35
+  }
+}`;
+
+    // Read file into buffer from disk storage
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const imagePart = fileToGenerativePart(fileBuffer, req.file.mimetype);
+
+    const result = await model.generateContent([prompt, imagePart]);
+    const response = await result.response;
+    let jsonText = response.text().trim();
+
+    // Clean markdown code blocks if the model wrapped it (e.g. ```json ... ```)
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    }
+
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(jsonText);
+    } catch (e) {
+      return res.status(500).json({ 
+        error: 'Failed to parse JSON response from model', 
+        rawResponse: jsonText 
+      });
+    }
+
+    res.json(parsedResult);
+  } catch (error) {
+    console.error('Error during diagram extraction:', error);
+    res.status(500).json({ error: 'Failed to process the file. ' + error.message });
+  }
+});
+
+// API endpoint to lint and fix LaTeX code
+app.post('/api/fix-latex', requireAuth, async (req, res) => {
+  try {
+    const { latex } = req.body;
+    if (!latex) {
+      return res.status(400).json({ error: 'Please provide the LaTeX code to fix.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ 
+        error: 'Gemini API key is not configured on the server. Please add it to your .env file.' 
+      });
+    }
+
+    // Use gemini-2.5-flash for LaTeX syntax checking and fixing
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.5-flash',
+      systemInstruction: `You are an expert LaTeX compiler and debugging assistant. Your task is to review the provided LaTeX code, identify any syntax errors, missing packages, or compilation issues, and return the fully corrected, perfectly compilable code.
+
+Perform the following strict checks before outputting the code:
+
+1. MISSING PACKAGES:
+   - If the code uses \\rowcolor or \\cellcolor in tables, you MUST add \\usepackage{colortbl} to the preamble.
+   - If the code uses relative positioning (e.g., \`below=of...\`), you MUST add \\usetikzlibrary{positioning}.
+   - If the code uses complex arrows, add \\usetikzlibrary{arrows.meta}.
+   - Ensure \\usepackage{amsmath, amssymb} are present for mathematical symbols.
+
+2. SYNTAX ERRORS (TIKZ):
+   - Check for the PGF Math Error: \`inner sep\` cannot take multiple values. If you see \`inner sep=Xpt Ypt\`, change it to \`inner xsep=Xpt, inner ysep=Ypt\`.
+   - Ensure all TikZ commands end with a semicolon (;).
+   - Ensure table column definitions match the number of cells in the rows.
+
+3. ENCODING & STRUCTURE:
+   - Ensure \\usepackage[utf8]{inputenc} and \\usepackage[T1]{fontenc} are included.
+   - Ensure the document starts with \\begin{document} and ends with \\end{document}.
+
+4. OUTPUT RULES:
+   - Fix the code silently. 
+   - Output ONLY the fully corrected code enclosed in a \`\`\`latex \`\`\` markdown block.
+   - Do not include any explanations, greetings, warnings, or conversational text whatsoever.`
+    });
+
+    const result = await model.generateContent([
+      "Fix this LaTeX code: \n\n" + latex
+    ]);
+    const response = await result.response;
+    let fixedLatex = response.text().trim();
+
+    // Clean markdown code blocks if the model wrapped it (e.g. ```latex ... ```)
+    if (fixedLatex.startsWith('```')) {
+      fixedLatex = fixedLatex.replace(/^```(?:latex)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    }
+
+    res.json({ latex: fixedLatex });
+  } catch (error) {
+    console.error('Error during LaTeX linting/fixing:', error);
+    res.status(500).json({ error: 'Failed to fix the LaTeX code. ' + error.message });
   }
 });
 

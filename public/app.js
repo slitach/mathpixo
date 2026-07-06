@@ -862,9 +862,9 @@ function renderFormula(latex, status, errorMsg) {
 
     try {
         // Diagram detection (TikZ, pgfplots, blox)
-        const hasTikz = latex.includes('\\begin{tikzpicture}') || latex.includes('\\tikzpicture');
-        const hasBlox = latex.includes('\\begin{blox}') || latex.includes('\\bXInput') || latex.includes('\\bXComp');
-        const hasPgfplots = latex.includes('\\begin{axis}') || latex.includes('\\begin{semilogyaxis}') || latex.includes('\\begin{semilogxaxis}');
+        const hasTikz = latex.includes('\\begin{tikzpicture}') || latex.includes('\\tikzpicture') || latex.includes('\\tikz') || latex.includes('\\draw') || latex.includes('\\node') || latex.includes('\\path') || latex.includes('\\usepackage{tikz}') || latex.includes('\\documentclass[tikz');
+        const hasBlox = latex.includes('\\begin{blox}') || latex.includes('\\bXInput') || latex.includes('\\bXComp') || latex.includes('\\usepackage{blox}');
+        const hasPgfplots = latex.includes('\\begin{axis}') || latex.includes('\\begin{semilogyaxis}') || latex.includes('\\begin{semilogxaxis}') || latex.includes('\\pgfplotsset') || latex.includes('\\usepackage{pgfplots}');
         
         if (hasTikz || hasBlox || hasPgfplots) {
             let diagramType = "TikZ Diagram";
@@ -921,12 +921,27 @@ function renderFormula(latex, status, errorMsg) {
 
 // Clean LaTeX delimiters for direct KaTeX rendering
 function cleanLatexForKaTeX(latex) {
-    // Split by lines and filter out LaTeX comments and usepackage lines
+    // Split by lines and filter out LaTeX comments, packages, and document structure
     let lines = latex.split('\n');
-    let cleanedLines = lines.filter(line => {
+    let cleanedLines = [];
+    
+    lines.forEach(line => {
         const trimmed = line.trim();
-        return !trimmed.startsWith('%') && !trimmed.startsWith('\\usepackage');
+        if (trimmed.startsWith('%') || 
+            trimmed.startsWith('\\usepackage') ||
+            trimmed.startsWith('\\usetikzlibrary') ||
+            trimmed.startsWith('\\documentclass') ||
+            trimmed.startsWith('\\begin{document}') ||
+            trimmed.startsWith('\\end{document}') ||
+            trimmed.startsWith('\\title{') ||
+            trimmed.startsWith('\\author{') ||
+            trimmed.startsWith('\\date{') ||
+            trimmed.startsWith('\\maketitle')) {
+            return;
+        }
+        cleanedLines.push(line);
     });
+    
     let cleaned = cleanedLines.join('\n').trim();
     
     // Strip starting/ending $$ or $ if present
@@ -955,8 +970,8 @@ function cleanLatexForCombinedDocument(latex) {
     lines.forEach(line => {
         const trimmed = line.trim();
 
-        // Detect and extract usepackage declarations
-        if (trimmed.startsWith('\\usepackage')) {
+        // Detect and extract usepackage and usetikzlibrary declarations
+        if (trimmed.startsWith('\\usepackage') || trimmed.startsWith('\\usetikzlibrary')) {
             extractedPackages.push(trimmed);
             return;
         }
@@ -1002,11 +1017,13 @@ function generateCombinedDocument() {
 
     if (allCodeText.includes('\\begin{tikzpicture}') || allCodeText.includes('\\tikzpicture')) {
         packages.push('\\usepackage{tikz}');
+        packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows}');
     }
     if (allCodeText.includes('\\begin{blox}') || allCodeText.includes('\\bXInput')) {
         // Blox requires TikZ
         if (!packages.includes('\\usepackage{tikz}')) {
             packages.push('\\usepackage{tikz}');
+            packages.push('\\usetikzlibrary{positioning, arrows.meta, arrows}');
         }
         packages.push('\\usepackage{blox}');
     }
