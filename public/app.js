@@ -371,17 +371,25 @@ function convertLatexToHtmlAndMathml(latex) {
                 }
 
                 // Render strictly to MathML
-                mathmlStr = window.katex.renderToString(formula, {
+                let rawRendered = window.katex.renderToString(formula, {
                     displayMode: placeholder.isBlock,
                     output: 'mathml',
                     throwOnError: false,
                     trust: true
                 });
 
+                // Extract only the inner <math ...> </math> tag for MS Word compatibility
+                const mathmlMatch = rawRendered.match(/<math[\s\S]*?<\/math>/);
+                if (mathmlMatch) {
+                    mathmlStr = mathmlMatch[0];
+                } else {
+                    mathmlStr = rawRendered;
+                }
+
                 if (placeholder.isBlock) {
                     mathmlStr = `<div style="text-align: center; margin-top: 12px; margin-bottom: 12px;">${mathmlStr}</div>`;
                 } else {
-                    mathmlStr = ` <span>${mathmlStr}</span> `;
+                    mathmlStr = ` ${mathmlStr} `;
                 }
             } catch (err) {
                 console.error('KaTeX MathML render error:', err);
