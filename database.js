@@ -61,12 +61,16 @@ function registerUser(email, password, name) {
     throw new Error('User already exists with this email.');
   }
 
+  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  const activationToken = hasSmtp ? crypto.randomBytes(32).toString('hex') : undefined;
+
   const user = {
     id: 'user_' + crypto.randomBytes(8).toString('hex'),
     email: lowerEmail,
     name: name || email.split('@')[0],
     password: hashPassword(password),
-    activated: true,
+    activated: !hasSmtp,
+    activationToken,
     subscription: {
       plan: 'free',
       status: 'active',
@@ -105,6 +109,10 @@ function authenticateUser(email, password) {
 
   if (!user || !verifyPassword(password, user.password)) {
     throw new Error('Invalid email or password.');
+  }
+
+  if (!user.activated) {
+    throw new Error('Please activate your account via email before logging in.');
   }
 
   // Schema fallbacks for existing users

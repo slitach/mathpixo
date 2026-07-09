@@ -1240,6 +1240,11 @@ loginForm.addEventListener('submit', async (e) => {
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     registerError.classList.add('hidden');
+    // Restore default error style
+    registerError.style.color = '';
+    registerError.style.background = '';
+    registerError.style.borderColor = '';
+    
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
@@ -1254,6 +1259,18 @@ registerForm.addEventListener('submit', async (e) => {
         if (!response.ok) {
             throw new Error(data.error || 'Registration failed.');
         }
+        
+        if (data.user && !data.user.activated) {
+            // Success but activation is required
+            registerError.textContent = data.message || 'Registration successful! Please check your email to activate your account.';
+            registerError.style.color = 'var(--accent, #14b8a6)';
+            registerError.style.background = 'rgba(20, 184, 166, 0.08)';
+            registerError.style.borderColor = 'rgba(20, 184, 166, 0.2)';
+            registerError.classList.remove('hidden');
+            registerForm.reset();
+            return;
+        }
+
         currentUser = data.user;
         hideAuthModal();
         renderUserSection();

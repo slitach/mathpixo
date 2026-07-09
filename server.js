@@ -81,8 +81,9 @@ function requireAuth(req, res, next) {
   const token = req.cookies['session_token'];
   let userId = token ? db.getSession(token) : null;
   
+  const loggedOut = req.cookies['logged_out'] === 'true';
   // Auto-login on localhost for local testing/development convenience
-  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+  if (!userId && !loggedOut && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
     userId = 'user_local_dev';
   }
 
@@ -97,8 +98,9 @@ function optionalAuth(req, res, next) {
   const token = req.cookies['session_token'];
   let userId = token ? db.getSession(token) : null;
   
+  const loggedOut = req.cookies['logged_out'] === 'true';
   // Auto-login on localhost for local testing/development convenience
-  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+  if (!userId && !loggedOut && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
     userId = 'user_local_dev';
   }
 
@@ -116,7 +118,6 @@ function fileToGenerativePart(buffer, mimeType) {
   };
 }
 
-// User Authentication Endpoints
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password) {
@@ -124,18 +125,27 @@ app.post('/api/auth/register', async (req, res) => {
   }
   try {
     const user = db.registerUser(email, password, name);
-    const token = db.createSession(user.id);
-    res.cookie('session_token', token, {
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
+    res.clearCookie('logged_out');
 
-    // Send welcome email in background
-    emailService.sendConfirmationEmail(user.email, user.name).catch(err => {
+    // Send welcome/activation email in background
+    emailService.sendConfirmationEmail(user.email, user.name, user.activationToken).catch(err => {
       console.error('Failed to send registration confirmation email:', err);
     });
 
-    res.json({ user });
+    if (user.activated) {
+      const token = db.createSession(user.id);
+      res.cookie('session_token', token, {
+        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      });
+      res.json({ user, autoLoggedIn: true });
+    } else {
+      res.json({ 
+        user, 
+        autoLoggedIn: false, 
+        message: 'Registration successful! Please check your email to activate your account.' 
+      });
+    }
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -162,6 +172,7 @@ app.post('/api/auth/login', (req, res) => {
   }
   try {
     const user = db.authenticateUser(email, password);
+    res.clearCookie('logged_out');
     const token = db.createSession(user.id);
     res.cookie('session_token', token, {
       httpOnly: true,
@@ -179,6 +190,10 @@ app.post('/api/auth/logout', (req, res) => {
     db.deleteSession(token);
   }
   res.clearCookie('session_token');
+  res.cookie('logged_out', 'true', {
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  });
   res.json({ success: true });
 });
 
@@ -186,7 +201,8 @@ app.get('/api/auth/me', (req, res) => {
   const token = req.cookies['session_token'];
   let userId = token ? db.getSession(token) : null;
   
-  if (!userId && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
+  const loggedOut = req.cookies['logged_out'] === 'true';
+  if (!userId && !loggedOut && (req.hostname === 'localhost' || req.hostname === '127.0.0.1')) {
     return res.json({ 
       user: {
         id: 'user_local_dev',
@@ -305,6 +321,23 @@ app.post('/api/convert', requireAuth, upload.single('image'), async (req, res) =
       });
     }
 
+    // Verify user activation and extraction limits
+    if (req.userId && req.userId !== 'user_local_dev') {
+      const user = db.getUserById(req.userId);
+      if (user) {
+        if (!user.activated) {
+          return res.status(403).json({ error: 'Please activate your account via email to perform conversions.' });
+        }
+        const plan = user.subscription?.plan || 'free';
+        const limit = (plan === 'pro' || plan === 'organization') ? 6000 : 20;
+        if ((user.extractionsCount || 0) >= limit) {
+          return res.status(403).json({ 
+            error: `You have reached your monthly limit of ${limit.toLocaleString()} extractions. Please upgrade your plan.` 
+          });
+        }
+      }
+    }
+
     // Use gemini-2.5-flash for fast and accurate multimodal tasks with custom system prompt
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
@@ -365,6 +398,23 @@ app.post('/api/extract-diagram', requireAuth, upload.single('image'), async (req
       return res.status(500).json({ 
         error: 'Gemini API key is not configured on the server. Please add it to your .env file.' 
       });
+    }
+
+    // Verify user activation and extraction limits
+    if (req.userId && req.userId !== 'user_local_dev') {
+      const user = db.getUserById(req.userId);
+      if (user) {
+        if (!user.activated) {
+          return res.status(403).json({ error: 'Please activate your account via email to perform conversions.' });
+        }
+        const plan = user.subscription?.plan || 'free';
+        const limit = (plan === 'pro' || plan === 'organization') ? 6000 : 20;
+        if ((user.extractionsCount || 0) >= limit) {
+          return res.status(403).json({ 
+            error: `You have reached your monthly limit of ${limit.toLocaleString()} extractions. Please upgrade your plan.` 
+          });
+        }
+      }
     }
 
     // Use gemini-2.5-flash for fast and accurate computer vision tasks
