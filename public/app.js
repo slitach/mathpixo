@@ -1367,7 +1367,7 @@ async function initApp() {
     }
 
     if (window.location.protocol === 'file:') {
-        const warningMsg = "Warning: Mathpixo is running from a local file protocol (file://). To use the Gemini OCR conversion backend, you must run the server using 'npm start' and visit http://localhost:8000 in your browser.";
+        const warningMsg = "Warning: Mathpixo is running from a local file protocol (file://). To use the Gemini OCR conversion backend, you must run the server using 'npm start' and visit http://localhost:3000 in your browser.";
         
         // Render visible warning banner
         const warningBanner = document.createElement('div');
